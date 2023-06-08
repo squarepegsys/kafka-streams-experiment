@@ -3,12 +3,71 @@
  */
 package com.squarepegsystems.kafka.exp
 
-class App {
-    String getGreeting() {
-        return 'Hello World!'
-    }
+import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.common.serialization.Serdes
+import org.apache.kafka.streams.KafkaStreams
+import org.apache.kafka.streams.StreamsBuilder
+import org.apache.kafka.streams.StreamsConfig
+import org.apache.kafka.streams.kstream.KStream
+import org.apache.kafka.streams.kstream.ValueMapperWithKey
 
-    static void main(String[] args) {
-        println new App().greeting
-    }
+class App {
+   String getGreeting() {
+      return 'Hello World!'
+   }
+
+   Properties configStream() {
+
+      Properties config = new Properties()
+// Give the Streams application a unique name. The name must be unique in the Kafka cluster
+      config.put(StreamsConfig.APPLICATION_ID_CONFIG,
+         "simple-streams-example")
+      config.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG,
+
+         "localhost:9092"); config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+
+      config.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.ByteArray().getClass())
+      config.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass())
+
+      return config
+   }
+
+   void streamIt(Properties config) {
+      StreamsBuilder builder = new StreamsBuilder()
+      // Construct a KStream from the input Topic "TextLinesTopic"
+      KStream<byte[], String> textLines = builder.stream("stream.example")
+
+      // Convert to upper case
+      // had to make my own mapper because mapValues is overloaded and the runtime got confused.
+      // not sure that it's a groovy thing or not.
+      def mapper = new UpcaseMapper()
+      KStream<byte[], String> uppercasedWithMapValues = textLines.mapValues(mapper)
+
+      // Write the results to a new Kafka Topic called "UppercasedTextLinesTopic".
+      uppercasedWithMapValues.to("UppercasedTextLinesTopic")
+      // Run the Streams application via `start()`
+      KafkaStreams streams = new KafkaStreams(builder.build(), config)
+      streams.start()
+
+      // Stop the application gracefully
+      Runtime.getRuntime().addShutdownHook(new Thread(streams::close))
+   }
+
+   static void main(String[] args) {
+
+      App app = new App()
+      def config = app.configStream()
+
+      app.streamIt(config)
+
+   }
+
+   private class UpcaseMapper implements ValueMapperWithKey<byte[], String, Object> {
+
+
+      @Override
+      Object apply(byte[] readOnlyKey, String value) {
+         return value.toUpperCase()
+      }
+   }
 }
