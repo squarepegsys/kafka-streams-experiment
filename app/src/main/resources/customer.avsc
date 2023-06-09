@@ -1,0 +1,58 @@
+{
+  "type":"record",
+  "name":"Customer",
+  "namespace":"com.squarepegsystems.kafka.generated",
+  "fields": [
+    {
+    "type":"string",
+    "name":"id"
+  },
+    {
+    "type":"string",
+    "name":"firstName"
+  },
+
+   {
+    "type":"string",
+    "name":"lastName"
+  },
+   {
+    "type":"string",
+    "name":"company"
+  },
+   {
+    "type":"string",
+    "name":"phone1"
+  },
+   {
+    "type":"string",
+    "name":"phone2"
+  },
+   {
+    "type":"string",
+    "name":"city"
+  },
+   {
+    "type":"string",
+    "name":"country"
+  },
+   {
+    "type":"string",
+    "name":"email"
+  },
+       {
+    "type":"string",
+    "name":"subscription"
+  },
+   {
+    "type": [ "null", { "type": "int", "logicalType": "date" } ],
+    "name":"date"
+  },
+   {
+    "type":"string",
+    "name":"website"
+  }
+]
+
+
+}

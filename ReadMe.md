@@ -30,3 +30,10 @@ now dump the contents
 ``` sh
 kafkacat -C -t UppercasedTextLinesTopic   -b localhost:9092
 ```
+
+to generate the avro schema:
+
+``` sh
+./gradlew generateAvro
+
+```
