@@ -3,12 +3,12 @@
  */
 package com.squarepegsystems.kafka.exp
 
+
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.StreamsConfig
-import org.apache.kafka.streams.kstream.KStream
 import org.apache.kafka.streams.kstream.ValueMapperWithKey
 
 class App {
@@ -33,18 +33,14 @@ class App {
    }
 
    void streamIt(Properties config) {
+
+      CustomerMapper customerMapper = new CustomerMapper()
       StreamsBuilder builder = new StreamsBuilder()
-      // Construct a KStream from the input Topic "TextLinesTopic"
-      KStream<byte[], String> textLines = builder.stream("stream.example")
 
-      // Convert to upper case
-      // had to make my own mapper because mapValues is overloaded and the runtime got confused.
-      // not sure that it's a groovy thing or not.
-      def mapper = new UpcaseMapper()
-      KStream<byte[], String> uppercasedWithMapValues = textLines.mapValues(mapper)
+      builder.stream("csv.customer")
+                         .mapValues(customerMapper)
+                         .to("customers")
 
-      // Write the results to a new Kafka Topic called "UppercasedTextLinesTopic".
-      uppercasedWithMapValues.to("UppercasedTextLinesTopic")
       // Run the Streams application via `start()`
       KafkaStreams streams = new KafkaStreams(builder.build(), config)
       streams.start()
