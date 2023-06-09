@@ -45,7 +45,7 @@
     "name":"subscription"
   },
    {
-    "type": [ "null", { "type": "int", "logicalType": "date" } ],
+    "type": { "type": "int", "logicalType": "date" } ,
     "name":"date"
   },
    {
